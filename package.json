@@ -24,9 +24,13 @@
     "node"
   ],
   "scripts": {
-    "prepare": " node prepare.js",
+    "prepare": "node prepare.js",
     "pack": "npm pack",
-    "pub": "node updateVersionAndPublish.js"
+    "pub": "node updateVersionAndPublish.js",
+    "lint": "eslint . --ext .js",
+    "lint:fix": "eslint . --ext .js --fix",
+    "format": "prettier --write \"**/*.{js,json,md}\"",
+    "test": "node test/index.js"
   },
   "bin": {
     "jyeontu": "./bin.js"
@@ -34,18 +38,20 @@
   "author": "JYeontu",
   "license": "ISC",
   "dependencies": {
-    "-": "^0.0.1",
     "@jyeontu/j-inquirer": "^1.0.5",
     "@jyeontu/progress-bar": "^1.0.5",
     "axios": "^1.6.2",
     "exif": "^0.6.0",
     "figlet": "^1.7.0",
-    "fs": "^0.0.1-security",
     "fs-extra": "^11.1.1",
     "html-pdf-node": "^1.0.8",
     "jimp": "^0.22.10",
     "mkdirp": "^1.0.4",
     "pdf-lib": "^1.17.1",
     "qrcode": "^1.5.3"
+  },
+  "devDependencies": {
+    "eslint": "^8.0.0",
+    "prettier": "^3.0.0"
   }
 }
