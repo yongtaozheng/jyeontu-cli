@@ -1,0 +1,44 @@
+#!/bin/sh
+
+color_red="\e[0;31m"
+color_blue="\e[34m"
+color_reset="\e[00m"
+
+currBranch=$(git symbolic-ref --short HEAD)
+mergedList=$(git branch --merged $currBranch)
+
+#echo -e "$currBranch 分支包含以下分支的合并记录："
+#echo -e "${color_blue}$mergedList${color_reset}"
+
+IFS=$'\n' read -d '' -ra array <<< "$mergedList"
+
+search="test"
+found=false
+
+for item in "${array[@]}"; do
+    item_without_spaces=${item//[[:space:]]/}
+    if [[ "$item_without_spaces" == "$search" ]]; then
+        found=true
+        break
+    fi
+done
+
+# 输出结果
+if $found; then
+    echo -e "${color_red}当前分支（$currBranch） 包含了 $search分支 合并记录 ${color_reset}"
+    read -p "请确定是否提交?(N/Y): " confirm </dev/tty
+    case "$confirm" in
+        n|N):
+            echo "已取消"
+            exit 1
+        ;;
+        y|Y):
+            # 选择了确认
+            exit 0
+        ;;
+        *)
+            echo 2>&1 "已取消"
+            exit 2
+        ;;
+    esac
+fi

@@ -1,0 +1,26 @@
+{
+  "fileLineCount": {
+    "folderName": "E:\\myGitee\\node-scripting-tool\\src\\jyeontu",
+    "fileType": [
+      "vue",
+      "js",
+      "ts",
+      "css",
+      "html"
+    ],
+    "ignoreName": [
+      "node_modules",
+      "dist"
+    ],
+    "maxLine": "100"
+  },
+  "scanBigFile": {
+    "directory": "E:\\myGitee\\node-scripting-tool\\src\\jyeontu",
+    "ignoreName": [
+      "node_modules",
+      "dist",
+      ".git"
+    ],
+    "maxSize": "1"
+  }
+}

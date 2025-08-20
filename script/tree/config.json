@@ -1,0 +1,8 @@
+{
+  "getDirTree": {
+    "basepath": "E:\\myGitee\\node-scripting-tool\\src\\jyeontu",
+    "filterFile": "node_modules,dist,.git",
+    "stopFloor": "6",
+    "generatePath": "E:\\myGitee\\node-scripting-tool\\src\\jyeontu"
+  }
+}

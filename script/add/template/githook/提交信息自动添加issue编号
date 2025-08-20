@@ -1,0 +1,21 @@
+#!/usr/bin/env node
+const child_process = require("child_process");
+const fs = require("fs");
+//获取入参
+process.argv.shift();
+const commit_msg_filepath = process.argv[1];
+const commit_type = process.argv[2] || "";
+const commit_hash = process.argv[3] || "";
+console.log("Type: ", commit_type, "\nHash:", commit_hash);
+const command = "git symbolic-ref --short HEAD";
+const trimReg = /(\ +)|([ ])|([\r\n])/g;
+let branch = child_process.execSync(command).toString().replace(trimReg, "");
+if (branch.startsWith("issue-")) {
+  console.log("On issue branch:", branch);
+  const reg = /(.*)-([0-9]*)$/;
+  let result = branch.match(reg);
+  let issue_number = result[2];
+  let content = fs.readFileSync(commit_msg_filepath);
+  fs.writeFileSync(commit_msg_filepath, `${content}#${issue_number}`);
+}
+process.exit(0);
