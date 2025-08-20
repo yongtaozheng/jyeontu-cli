@@ -1,0 +1,474 @@
+
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>sample</title>
+    <!-- MathJax 配置 -->
+    <script>
+        window.MathJax = {
+            tex: {
+                inlineMath: [['\\(', '\\)']],
+                displayMath: [['\\[', '\\]']],
+                processEscapes: true,
+                processEnvironments: true,
+                packages: ['base', 'ams', 'noerrors', 'noundefined']
+            },
+            options: {
+                ignoreHtmlClass: 'tex2jax_ignore',
+                processHtmlClass: 'tex2jax_process',
+                enableMenu: false,
+                menuOptions: {
+                    settings: {
+                        texHints: true,
+                        semantics: false,
+                        zoom: 'NoZoom'
+                    }
+                }
+            },
+            startup: {
+                pageReady: () => {
+                    return MathJax.startup.defaultPageReady().then(() => {
+                        console.log('MathJax is loaded');
+                    });
+                }
+            },
+            loader: {
+                load: ['[tex]/ams', '[tex]/noerrors', '[tex]/noundefined']
+            }
+        };
+    </script>
+    <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    <style>
+        body {
+            font-family: 'Microsoft YaHei', 'SimSun', 'SimHei', sans-serif;
+            font-size: 14px;
+            line-height: 1.6;
+            color: #333;
+            margin: 0;
+            padding: 20px;
+            background-color: white;
+        }
+        .title {
+            font-size: 24px;
+            font-weight: bold;
+            text-align: center;
+            margin-bottom: 30px;
+            color: #2c3e50;
+            border-bottom: 2px solid #3498db;
+            padding-bottom: 10px;
+        }
+        h1, h2, h3, h4, h5, h6 {
+            color: #2c3e50;
+            margin-top: 1.5em;
+            margin-bottom: 0.5em;
+            font-weight: 600;
+            line-height: 1.25;
+        }
+        h1 { font-size: 2em; }
+        h2 { font-size: 1.5em; }
+        h3 { font-size: 1.25em; }
+        h4 { font-size: 1em; }
+        h5 { font-size: 0.875em; }
+        h6 { font-size: 0.85em; }
+        p {
+            margin: 0.8em 0;
+            line-height: 1.8;
+        }
+        /* 行内代码样式 */
+        code {
+            background-color: #f1f3f4;
+            color: #d73a49;
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-family: 'SF Mono', 'Monaco', 'Inconsolata', 'Roboto Mono', 'Source Code Pro', 'Courier New', monospace;
+            font-size: 0.85em;
+            border: 1px solid #e1e4e8;
+            white-space: nowrap;
+        }
+        
+        /* 代码块样式 */
+        pre {
+            background-color: #f6f8fa;
+            border: 1px solid #e1e4e8;
+            border-radius: 6px;
+            padding: 16px;
+            margin: 16px 0;
+            overflow-x: auto;
+            position: relative;
+        }
+        
+        /* 代码块内的代码样式 */
+        pre code {
+            background-color: transparent;
+            color: #24292e;
+            padding: 0;
+            border: none;
+            border-radius: 0;
+            font-size: 0.9em;
+            line-height: 1.45;
+            white-space: pre;
+            word-wrap: normal;
+            display: block;
+        }
+        
+        /* 语法高亮样式 */
+        .hljs-keyword { color: #d73a49; }
+        .hljs-string { color: #032f62; }
+        .hljs-comment { color: #6a737d; font-style: italic; }
+        .hljs-function { color: #6f42c1; }
+        .hljs-number { color: #005cc5; }
+        .hljs-operator { color: #d73a49; }
+        .hljs-variable { color: #24292e; }
+        blockquote {
+            border-left: 4px solid #3498db;
+            margin: 1.5em 0;
+            padding: 16px 20px;
+            color: #6a737d;
+            background-color: #f6f8fa;
+            border-radius: 0 8px 8px 0;
+            font-style: italic;
+            position: relative;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        
+        blockquote::before {
+            content: '"';
+            font-size: 3em;
+            color: #3498db;
+            position: absolute;
+            left: 10px;
+            top: -10px;
+            font-family: serif;
+            opacity: 0.3;
+            z-index: 0;
+        }
+        
+        blockquote p {
+            margin: 0.8em 0;
+            line-height: 1.6;
+            position: relative;
+            z-index: 1;
+            text-align: justify;
+            white-space: pre-line; /* 保持换行 */
+            min-height: 1.2em; /* 确保空段落有最小高度 */
+        }
+        
+        blockquote p:first-child {
+            margin-top: 0;
+        }
+        
+        blockquote p:last-child {
+            margin-bottom: 0;
+        }
+        
+        /* 空段落样式 */
+        blockquote p:empty,
+        blockquote p:blank {
+            min-height: 1.2em;
+            margin: 0.4em 0;
+        }
+        
+        blockquote br {
+            display: block;
+            content: "";
+            margin: 0.3em 0;
+        }
+        
+        blockquote strong {
+            color: #24292f;
+            font-weight: 600;
+            font-style: normal;
+        }
+        
+        blockquote code {
+            background-color: #e1e4e8;
+            color: #d73a49;
+            font-style: normal;
+            padding: 2px 4px;
+            border-radius: 3px;
+        }
+        
+        blockquote em {
+            font-style: italic;
+        }
+        
+        /* 引用块内的列表样式 */
+        blockquote ul, blockquote ol {
+            margin: 0.5em 0;
+            padding-left: 1.5em;
+        }
+        
+        blockquote li {
+            margin: 0.2em 0;
+            line-height: 1.4;
+        }
+        
+        blockquote ul {
+            list-style-type: disc;
+        }
+        
+        blockquote ol {
+            list-style-type: decimal;
+        }
+        
+        blockquote ul ul {
+            list-style-type: circle;
+        }
+        
+        blockquote ol ol {
+            list-style-type: lower-alpha;
+        }
+        ul, ol {
+            margin: 0.8em 0;
+            padding-left: 2em;
+        }
+        
+        ul ul, ol ol, ul ol, ol ul {
+            margin: 0.5em 0;
+            padding-left: 1.5em;
+        }
+        
+        li {
+            margin: 0.3em 0;
+            line-height: 1.6;
+        }
+        
+        li li {
+            margin: 0.2em 0;
+        }
+        
+        /* 列表样式 */
+        ul {
+            list-style-type: disc;
+        }
+        
+        ul ul {
+            list-style-type: circle;
+        }
+        
+        ul ul ul {
+            list-style-type: square;
+        }
+        
+        ol {
+            list-style-type: decimal;
+        }
+        
+        ol ol {
+            list-style-type: lower-alpha;
+        }
+        
+        ol ol ol {
+            list-style-type: lower-roman;
+        }
+        
+        /* 表格样式 */
+        table {
+            border-collapse: collapse;
+            width: 100%;
+            margin: 16px 0;
+            font-size: 0.9em;
+            border: 1px solid #d0d7de;
+            border-radius: 6px;
+            overflow: hidden;
+        }
+        
+        thead {
+            background-color: #f6f8fa;
+        }
+        
+        tbody tr:nth-child(even) {
+            background-color: #f6f8fa;
+        }
+        
+        tbody tr:hover {
+            background-color: #f0f0f0;
+        }
+        
+        th, td {
+            border: 1px solid #d0d7de;
+            padding: 12px 16px;
+            text-align: left;
+            vertical-align: top;
+            word-wrap: break-word;
+        }
+        
+        th {
+            font-weight: 600;
+            color: #24292f;
+            background-color: #f6f8fa;
+        }
+        
+        /* 图片样式 */
+        img {
+            max-width: 100%;
+            height: auto;
+            display: block;
+            margin: 16px auto;
+            border-radius: 4px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+        
+        @page {
+            size: A4;
+            margin: 2cm;
+        }
+        
+        /* 数学公式样式 */
+        .math-inline {
+            display: inline;
+        }
+        
+        .math-block {
+            text-align: center;
+            margin: 1em 0;
+            padding: 0.5em 0;
+        }
+        
+        /* MathJax 样式优化 */
+        .MathJax {
+            font-size: 1em;
+        }
+        
+        .MathJax_Display {
+            margin: 1em 0;
+        }
+    </style>
+</head>
+<body>
+    <div class="title">sample</div>
+    <h1>Markdown 转 PDF 测试文档</h1></p><p>这是一个用于测试 markdown 转 PDF 功能的示例文档。</p><p><h2>基础语法测试</h2></p><p><h3>1. 标题层级</h3></p><p>这是一级标题</p><p><h2>这是二级标题</h2></p><p><h3>这是三级标题</h3></p><p><h3>2. 文本格式</h3><p><strong>这是粗体文本</strong></p>
+<p><em>这是斜体文本</em></p>
+<p><strong><em>这是粗斜体文本</strong></em></p><h4>四级标题测试</h4></p><p>这是一个四级标题的测试，应该有不同的字体大小和样式。</p><p><h3>3. 代码示例</h3></p><p><h4>行内代码</h4></p><p>这里有一个 <code>console.log('Hello World')</code> 的行内代码示例。</p><p><h4>代码块</h4><p><pre><code class="language-javascript">function helloWorld() {</p>
+<p>    console.log('Hello, World!');</p>
+<p>    return 'Hello, World!';</p>
+<p>}</p><p>// 这是一个注释</p>
+<p>const result = helloWorld();</p>
+<p>console.log(result);</code></pre></p><p><pre><code class="language-python">def hello_world():</p>
+<p>    print("Hello, World!")</p>
+<p>    return "Hello, World!"</p><h1>这是一个注释</h1>
+<p>result = hello_world()</p>
+<p>print(result)</code></pre></p><h3>4. 列表</h3></p><p><h4>无序列表</h4></p><ul><li>第一项</li><li>第二项</li><li>嵌套项 1<ul><li>嵌套项 2</li><li>更深层嵌套<ul><li>另一个深层嵌套</li></ul></li><li>嵌套项 3</li></ul></li><li>第三项</li><li>另一个嵌套项<ul></ul></li><li>第四项</li></ul></ul></p><p><h4>有序列表</h4></p><ol><li>第一步</li><li>第二步</li><li>子步骤 1</li><li>子步骤 2</li><li>更深层步骤<ol><li>另一个深层步骤</li></ol></li><li>第三步</li><li>另一个子步骤</li><li>第四步</li></ol></ol><p><h4>混合列表</h4><p><ul><li>无序项 1</li></ul></ul>
+<ol><li>有序子项 1<ol><li>有序子项 2</li></ol></li></ol></ol>
+<ul><li>无序项 2</li><li>无序子项 1<ul><li>无序子项 2</li></ul></li></ul></ul>
+<ol><li>更深层有序项<ol></ol></li></ol></li></ol></ol><h3>5. 引用</h3><blockquote><p>这是一个引用块</p><p>&nbsp;</p><p>可以包含多行内容</p><p>&nbsp;</p><p>也可以包含 <strong>粗体</strong> 和 <code>代码</code></p><p>&nbsp;</p><p>这是引用块的第三行内容</p><p>&nbsp;</p><p>引用块应该有不同的背景色和左边框</p></blockquote>
+<h4>复杂引用块测试</h4><blockquote><p>这是一个包含多种格式的引用块：</p><p>&nbsp;</p><ul><li>包含 <strong>粗体文本</strong></li><br><li>包含 <em>斜体文本</em></li><br><li>包含 <code>行内代码</code>1212112</li><br><li>包含 <a href="https://github.com">链接</a></li></p><p>&nbsp;</p><p>引用块应该：</p><p>&nbsp;</p><p><li>有左边框</li><br><li>有背景色</li><br><li>支持多行内容</li><br><li>支持内部格式化</li></ul></blockquote>
+<h3>6. 链接和图片</h3></p><p>这是一个 <a href="https://github.com">链接示例</a></p><p>!<a href="https://via.placeholder.com/300x200">图片示例</a></p><p><h3>7. 表格</h3>
+<p><table></p>
+<p><thead></p>
+<p><tr></p>
+<p><th>功能</th></p>
+<p><th>支持情况</th></p>
+<p><th>备注</th></p>
+<p></tr></p>
+<p></thead></p>
+<p><tbody></p>
+<p><tr></p>
+<p><td>标题</td></p>
+<p><td>✅</td></p>
+<p><td>支持 1-6 级标题</td></p>
+<p></tr></p>
+<p><tr></p>
+<p><td>粗体</td></p>
+<p><td>✅</td></p>
+<p><td>使用<strong>文本</strong></td></p>
+<p></tr></p>
+<p><tr></p>
+<p><td>斜体</td></p>
+<p><td>✅</td></p>
+<p><td>使用<em>文本</em></td></p>
+<p></tr></p>
+<p><tr></p>
+<p><td>代码</td></p>
+<p><td>✅</td></p>
+<p><td>行内和代码块</td></p>
+<p></tr></p>
+<p><tr></p>
+<p><td>列表</td></p>
+<p><td>✅</td></p>
+<p><td>有序和无序</td></p>
+<p></tr></p>
+<p><tr></p>
+<p><td>表格</td></p>
+<p><td>✅</td></p>
+<p><td>基础表格支持</td></p>
+<p></tr></p>
+<p><tr></p>
+<p><td>链接</td></p>
+<p><td>✅</td></p>
+<p><td>支持外部链接</td></p>
+<p></tr></p>
+<p><tr></p>
+<p><td>引用</td></p>
+<p><td>✅</td></p>
+<p><td>多行引用块</td></p>
+<p></tr></p>
+<p></tbody></p>
+<p></table><h4>复杂表格测试</h4></p>
+<p><table></p>
+<p><thead></p>
+<p><tr></p>
+<p><th>列1</th></p>
+<p><th>列2</th></p>
+<p><th>列3</th></p>
+<p><th>列4</th></p>
+<p></tr></p>
+<p></thead></p>
+<p><tbody></p>
+<p><tr></p>
+<p><td>数据1</td></p>
+<p><td>数据2</td></p>
+<p><td>数据3</td></p>
+<p><td>数据4</td></p>
+<p></tr></p>
+<p><tr></p>
+<p><td>长文本数据</td></p>
+<p><td>短数据</td></p>
+<p><td>中等长度数据</td></p>
+<p><td>数据</td></p>
+<p></tr></p>
+<p><tr></p>
+<p><td>数据</td></p>
+<p><td>数据</td></p>
+<p><td>数据</td></p>
+<p><td>数据</td></p>
+<p></tr></p>
+<p></tbody></p>
+<p></table><h3>8. 分割线</h3></p><hr><h2>高级功能测试</h2></p><p><h3>代码高亮</h3><p><pre><code class="language-javascript">// JavaScript 代码示例</p>
+<p>class Calculator {</p>
+<p>    constructor() {</p>
+<p>        this.result = 0;</p>
+<p>    }</p>
+<p>  </p>
+<p>    add(a, b) {</p>
+<p>        return a + b;</p>
+<p>    }</p>
+<p>  </p>
+<p>    subtract(a, b) {</p>
+<p>        return a - b;</p>
+<p>    }</p>
+<p>}</p><p>const calc = new Calculator();</p>
+<p>console.log(calc.add(5, 3)); // 输出: 8</code></pre></p><p><pre><code class="language-css">/<em> CSS 代码示例 </em>/</p>
+<p>.container {</p>
+<p>    max-width: 1200px;</p>
+<p>    margin: 0 auto;</p>
+<p>    padding: 20px;</p>
+<p>}</p><p>.button {</p>
+<p>    background-color: #007bff;</p>
+<p>    color: white;</p>
+<p>    padding: 10px 20px;</p>
+<p>    border: none;</p>
+<p>    border-radius: 4px;</p>
+<p>    cursor: pointer;</p>
+<p>}</p><p>.button:hover {</p>
+<p>    background-color: #0056b3;</p>
+<p>}</code></pre></p><h3>数学公式（如果支持）</h3><p>如果支持 LaTeX 语法，可以显示数学公式：</p><ul><li>行内公式：<span class="math-inline">\(E = mc^2\)</span></li><li>块级公式：</li></ul></ul>
+<p>  <div class="math-block">\[</p>
+<p>  \int_{-\infty}^{\infty} e^{-x^2} dx = \sqrt{\pi}</p>
+<p>  \]</div></p><h2>总结</h2></p><p>这个测试文档包含了 markdown 的主要语法元素，可以用来验证转换功能是否正常工作。</p><p><h3>检查清单</h3><ul><li>[X]  标题层级</li><li>[X]  文本格式</li><li>[X]  代码块</li><li>[X]  列表</li><li>[X]  引用</li><li>[X]  表格</li><li>[X]  链接</li><li>[X]  分割线</li></ul></ul><hr><p><em>文档结束</em></p>
+
+</body>
+</html>

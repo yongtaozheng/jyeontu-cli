@@ -65,7 +65,7 @@ class MarkdownToPdfConverter {
             await fs.writeFile(pdfFilePath, buffer);
             
         } finally {
-            await fs.remove(tempHtmlPath);
+            // await fs.remove(tempHtmlPath);
         }
     }
 
@@ -79,6 +79,42 @@ class MarkdownToPdfConverter {
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>${title}</title>
+    <!-- MathJax 配置 -->
+    <script>
+        window.MathJax = {
+            tex: {
+                inlineMath: [['\\\\(', '\\\\)']],
+                displayMath: [['\\\\[', '\\\\]']],
+                processEscapes: true,
+                processEnvironments: true,
+                packages: ['base', 'ams', 'noerrors', 'noundefined']
+            },
+            options: {
+                ignoreHtmlClass: 'tex2jax_ignore',
+                processHtmlClass: 'tex2jax_process',
+                enableMenu: false,
+                menuOptions: {
+                    settings: {
+                        texHints: true,
+                        semantics: false,
+                        zoom: 'NoZoom'
+                    }
+                }
+            },
+            startup: {
+                pageReady: () => {
+                    return MathJax.startup.defaultPageReady().then(() => {
+                        console.log('MathJax is loaded');
+                    });
+                }
+            },
+            loader: {
+                load: ['[tex]/ams', '[tex]/noerrors', '[tex]/noundefined']
+            }
+        };
+    </script>
+    <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
     <style>
         body {
             font-family: 'Microsoft YaHei', 'SimSun', 'SimHei', sans-serif;
@@ -190,6 +226,8 @@ class MarkdownToPdfConverter {
             position: relative;
             z-index: 1;
             text-align: justify;
+            white-space: pre-line; /* 保持换行 */
+            min-height: 1.2em; /* 确保空段落有最小高度 */
         }
         
         blockquote p:first-child {
@@ -198,6 +236,19 @@ class MarkdownToPdfConverter {
         
         blockquote p:last-child {
             margin-bottom: 0;
+        }
+        
+        /* 空段落样式 */
+        blockquote p:empty,
+        blockquote p:blank {
+            min-height: 1.2em;
+            margin: 0.4em 0;
+        }
+        
+        blockquote br {
+            display: block;
+            content: "";
+            margin: 0.3em 0;
         }
         
         blockquote strong {
@@ -216,6 +267,33 @@ class MarkdownToPdfConverter {
         
         blockquote em {
             font-style: italic;
+        }
+        
+        /* 引用块内的列表样式 */
+        blockquote ul, blockquote ol {
+            margin: 0.5em 0;
+            padding-left: 1.5em;
+        }
+        
+        blockquote li {
+            margin: 0.2em 0;
+            line-height: 1.4;
+        }
+        
+        blockquote ul {
+            list-style-type: disc;
+        }
+        
+        blockquote ol {
+            list-style-type: decimal;
+        }
+        
+        blockquote ul ul {
+            list-style-type: circle;
+        }
+        
+        blockquote ol ol {
+            list-style-type: lower-alpha;
         }
         ul, ol {
             margin: 0.8em 0;
@@ -312,6 +390,26 @@ class MarkdownToPdfConverter {
             size: A4;
             margin: 2cm;
         }
+        
+        /* 数学公式样式 */
+        .math-inline {
+            display: inline;
+        }
+        
+        .math-block {
+            text-align: center;
+            margin: 1em 0;
+            padding: 0.5em 0;
+        }
+        
+        /* MathJax 样式优化 */
+        .MathJax {
+            font-size: 1em;
+        }
+        
+        .MathJax_Display {
+            margin: 1em 0;
+        }
     </style>
 </head>
 <body>
@@ -324,7 +422,10 @@ class MarkdownToPdfConverter {
     markdownToHtml(markdown) {
         let html = markdown;
         
-        // 处理标题 - 按顺序处理，从6级到1级
+        // 第一步：处理代码块（必须在所有其他处理之前）
+        html = this.processCodeBlocks(html);
+        
+        // 第二步：处理标题
         html = html.replace(/^###### (.*$)/gim, '<h6>$1</h6>');
         html = html.replace(/^##### (.*$)/gim, '<h5>$1</h5>');
         html = html.replace(/^#### (.*$)/gim, '<h4>$1</h4>');
@@ -332,36 +433,66 @@ class MarkdownToPdfConverter {
         html = html.replace(/^## (.*$)/gim, '<h2>$1</h2>');
         html = html.replace(/^# (.*$)/gim, '<h1>$1</h1>');
         
-        // 处理粗体和斜体
+        // 第三步：处理行内代码
+        html = html.replace(/`([^`]+)`/g, '<code>$1</code>');
+        
+        // 第四步：处理数学公式
+        html = this.processMathFormulas(html);
+        
+        // 第五步：处理粗体和斜体
         html = html.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
         html = html.replace(/\*(.*?)\*/g, '<em>$1</em>');
         
-        // 处理代码块 - 改进版本
-        html = html.replace(/```(\w+)?\n([\s\S]*?)```/g, (match, lang, code) => {
-            const language = lang || 'text';
-            return `<pre><code class="language-${language}">${this.escapeHtml(code.trim())}</code></pre>`;
-        });
-        
-        // 处理行内代码
-        html = html.replace(/`([^`]+)`/g, '<code>$1</code>');
-        
-        // 处理链接
+        // 第六步：处理链接和图片
         html = html.replace(/\[([^\]]+)\]\(([^)]+)\)/g, '<a href="$2">$1</a>');
-        
-        // 处理图片
         html = html.replace(/!\[([^\]]*)\]\(([^)]+)\)/g, '<img src="$2" alt="$1" style="max-width: 100%; height: auto;">');
         
-        // 处理列表 - 改进版本，支持嵌套
+        // 第七步：处理列表
         html = this.processLists(html);
         
-        // 处理引用块 - 改进版本，支持多行
+        // 第八步：处理引用块
         html = this.processBlockquotes(html);
         
-        // 处理分割线
+        // 第九步：处理分割线
         html = html.replace(/^---$/gim, '<hr>');
         
-        // 处理表格 - 改进版本
-        html = html.replace(/(\|.*\|[\r\n]+)+/g, (match) => {
+        // 第十步：处理表格
+        html = this.processTables(html);
+        
+        // 第十一步：处理段落
+        html = this.processParagraphs(html);
+        
+        return html;
+    }
+    
+    processCodeBlocks(html) {
+        // 使用占位符保护代码块内容
+        const codeBlocks = [];
+        let blockIndex = 0;
+        
+        html = html.replace(/```(\w+)?\n([\s\S]*?)```/g, (match, lang, code) => {
+            const language = lang || 'text';
+            const placeholder = `__CODE_BLOCK_${blockIndex}__`;
+            codeBlocks[blockIndex] = { language, code: code.trim() };
+            blockIndex++;
+            return placeholder;
+        });
+        
+        // 处理其他内容...
+        // 这里暂时返回，后续会重新插入代码块
+        
+        // 重新插入代码块
+        codeBlocks.forEach((block, index) => {
+            const placeholder = `__CODE_BLOCK_${index}__`;
+            const codeHtml = `<pre><code class="language-${block.language}">${block.code}</code></pre>`;
+            html = html.replace(placeholder, codeHtml);
+        });
+        
+        return html;
+    }
+    
+    processTables(html) {
+        return html.replace(/(\|.*\|[\r\n]+)+/g, (match) => {
             const lines = match.trim().split('\n');
             if (lines.length < 2) return match;
             
@@ -395,8 +526,10 @@ class MarkdownToPdfConverter {
             tableHtml += '</tbody>\n</table>';
             return tableHtml;
         });
-        
-        // 处理段落 - 改进版本
+    }
+    
+    processParagraphs(html) {
+        // 处理段落
         html = html.replace(/\n\n/g, '</p><p>');
         html = html.replace(/^(.+)$/gm, '<p>$1</p>');
         
@@ -409,14 +542,7 @@ class MarkdownToPdfConverter {
         html = html.replace(/<p>(<ol>.*<\/ol>)<\/p>/g, '$1');
         html = html.replace(/<p>(<hr>)<\/p>/g, '$1');
         html = html.replace(/<p>(<table>.*<\/table>)<\/p>/g, '$1');
-        
-        // 确保列表项不被包装在段落中
         html = html.replace(/<p>(<li>.*<\/li>)<\/p>/g, '$1');
-        
-        // 确保引用块内容不被包装在段落中
-        html = html.replace(/<p>(<blockquote>.*<\/blockquote>)<\/p>/g, '$1');
-        
-        // 列表已经在processLists中处理，这里不需要额外包装
         
         return html;
     }
@@ -557,13 +683,13 @@ class MarkdownToPdfConverter {
             if (line.trim() === '' && inBlockquote) {
                 // 空行，继续引用块
                 blockquoteLines.push('');
-            } else if (line.trim().startsWith('> ')) {
+            } else if (line.trim().startsWith('>')) {
                 if (!inBlockquote) {
                     inBlockquote = true;
                     blockquoteLines = [];
                 }
-                // 移除开头的 "> " 并添加到引用行数组
-                const content = line.replace(/^> /, '');
+                // 移除开头的 ">" 并添加到引用行数组
+                const content = line.replace(/^>\s*/, '');
                 blockquoteLines.push(content);
             } else {
                 // 如果不是引用行，结束当前的引用块
@@ -579,6 +705,10 @@ class MarkdownToPdfConverter {
         
         // 处理文件末尾的引用块
         if (inBlockquote) {
+            // 去掉结尾的空行
+            while (blockquoteLines.length > 0 && blockquoteLines[blockquoteLines.length - 1].trim() === '') {
+                blockquoteLines.pop();
+            }
             const blockquoteContent = this.processBlockquoteContent(blockquoteLines.join('\n'));
             result.push(`<blockquote>${blockquoteContent}</blockquote>`);
         }
@@ -590,17 +720,20 @@ class MarkdownToPdfConverter {
         // 处理引用块内的markdown语法
         let processedContent = content;
         
+        // 处理行内代码（必须在粗体斜体之前）
+        processedContent = processedContent.replace(/`([^`]+)`/g, '<code>$1</code>');
+        
         // 处理粗体和斜体
         processedContent = processedContent.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
         processedContent = processedContent.replace(/\*(.*?)\*/g, '<em>$1</em>');
         
-        // 处理行内代码
-        processedContent = processedContent.replace(/`([^`]+)`/g, '<code>$1</code>');
-        
         // 处理链接
         processedContent = processedContent.replace(/\[([^\]]+)\]\(([^)]+)\)/g, '<a href="$2">$1</a>');
         
-        // 处理段落 - 改进版本
+        // 处理引用块内的列表
+        processedContent = this.processBlockquoteLists(processedContent);
+        
+        // 处理段落 - 修复版本，包含空行
         const lines = processedContent.split('\n');
         const paragraphs = [];
         let currentParagraph = [];
@@ -609,9 +742,11 @@ class MarkdownToPdfConverter {
             if (line.trim() === '') {
                 // 空行表示段落分隔
                 if (currentParagraph.length > 0) {
-                    paragraphs.push(currentParagraph.join(' '));
+                    paragraphs.push(currentParagraph.join('\n')); // 保持换行
                     currentParagraph = [];
                 }
+                // 添加空段落，保持背景色
+                paragraphs.push('');
             } else {
                 // 非空行添加到当前段落
                 currentParagraph.push(line);
@@ -620,13 +755,50 @@ class MarkdownToPdfConverter {
         
         // 处理最后一个段落
         if (currentParagraph.length > 0) {
-            paragraphs.push(currentParagraph.join(' '));
+            paragraphs.push(currentParagraph.join('\n')); // 保持换行
         }
         
-        // 包装成段落标签
-        processedContent = paragraphs.map(p => `<p>${p}</p>`).join('');
+        // 去掉结尾的空段落
+        while (paragraphs.length > 0 && paragraphs[paragraphs.length - 1] === '') {
+            paragraphs.pop();
+        }
+        
+        // 包装成段落标签，保持换行，空段落也包装
+        processedContent = paragraphs.map(p => {
+            if (p === '') {
+                return '<p>&nbsp;</p>'; // 空段落使用空格保持背景色
+            }
+            return `<p>${p.replace(/\n/g, '<br>')}</p>`;
+        }).join('');
         
         return processedContent;
+    }
+    
+    processBlockquoteLists(content) {
+        // 处理引用块内的无序列表
+        content = content.replace(/(^|\n)- (.+?)(?=\n(?!- )|$)/gms, (match, before, item) => {
+            return `${before}<li>${item}</li>`;
+        });
+        
+        // 处理引用块内的有序列表
+        content = content.replace(/(^|\n)\d+\. (.+?)(?=\n(?!\d+\. )|$)/gms, (match, before, item) => {
+            return `${before}<li>${item}</li>`;
+        });
+        
+        // 包装列表项
+        content = content.replace(/(<li>.*<\/li>)/gs, '<ul>$1</ul>');
+        
+        return content;
+    }
+    
+    processMathFormulas(html) {
+        // 处理块级数学公式 $$...$$（必须在行内公式之前）
+        html = html.replace(/\$\$([\s\S]*?)\$\$/g, '<div class="math-block">\\[$1\\]</div>');
+        
+        // 处理行内数学公式 $...$（排除已经在块级公式中的内容）
+        html = html.replace(/(?<!\\\[)(?<!\\\()\$([^\$\n]+?)\$/g, '<span class="math-inline">\\($1\\)</span>');
+        
+        return html;
     }
     
     escapeHtml(text) {
