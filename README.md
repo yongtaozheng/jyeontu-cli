@@ -44,6 +44,7 @@ npm install -g jyeontu
 - **项目行数统计** - 统计项目文件行数和超大文件
 - **大文件扫描** - 扫描指定大小的文件
 - **TXT转PDF** - 将文本文件转换为PDF格式
+- **MD转PDF** - 将Markdown文件转换为PDF格式，支持代码高亮
 
 ### 🌳 目录树生成
 
@@ -101,6 +102,9 @@ jyeontu file
 **大文件扫描：**
 ![大文件扫描](https://gitee.com/jyeontostore/img-bed/raw/master/img/1702349035856.jpg)
 
+**MD转PDF：**
+支持将Markdown文件转换为PDF，包含代码高亮、表格、列表等格式。
+
 ### WiFi 管理
 
 ```bash
@@ -129,7 +133,7 @@ jyeontu tree
 | `jyeontu add`    | 添加单文件模板                           |
 | `jyeontu wifi`   | WiFi 信息管理                            |
 | `jyeontu img`    | 图片处理（水印、下载、二维码、调整尺寸） |
-| `jyeontu file`   | 文件操作（统计、扫描、格式转换）         |
+| `jyeontu file`   | 文件操作（统计、扫描、TXT/MD转PDF）     |
 | `jyeontu tree`   | 生成目录树                               |
 | `jyeontu help`   | 显示帮助信息                             |
 

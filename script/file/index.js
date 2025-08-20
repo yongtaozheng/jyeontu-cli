@@ -4,7 +4,7 @@ const operateMap = {
   扫描大文件: require("./scanBigFile"),
   图片分组: require("./fileGrouping"),
   txt转pdf: require("./txt2pdf"),
-
+  md转pdf: require("./md2pdf"),
 };
 const file = async () => {
   const options = [
@@ -12,7 +12,7 @@ const file = async () => {
       type: "list",
       message: "请选择要进行的操作：",
       name: "action",
-      choices: ["行数统计", "扫描大文件", "图片分组","txt转pdf"], //, "更新版本号"
+      choices: ["行数统计", "扫描大文件", "图片分组","txt转pdf","md转pdf"], //, "更新版本号"
 
     },
   ];
